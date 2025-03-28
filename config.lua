@@ -1,6 +1,7 @@
 Config = {
     -- Loot horses saddle bags
-    lootHorsesCooldown = 900000, -- 15 minutes
+    lootHorsesCooldown = 60 * 15 * 1000, -- 15 minutes in milliseconds
+
 
     lootRewardChance = 30,
 

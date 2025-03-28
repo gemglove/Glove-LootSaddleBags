@@ -1,4 +1,4 @@
-local lastHorseLootTime = 0
+local lastHorseLootTime = GetGameTimer() - Config.lootHorsesCooldown
 local saddlebagPrompt = nil
 local deadLootPrompt = nil
 
@@ -33,33 +33,33 @@ function CreateLootPrompt()
     PromptRegisterEnd(saddlebagPrompt)
 end
 
-function CreateDeadLootPrompt()
-    local str = "~e~Steal From"
-    deadLootPrompt = PromptRegisterBegin()
-    PromptSetControlAction(deadLootPrompt, 0xCEFD9220) -- INPUT_LOOT (default R)
-    PromptSetText(deadLootPrompt, CreateVarString(10, "LITERAL_STRING", str))
-    PromptSetHoldMode(deadLootPrompt, true)
-    PromptSetEnabled(deadLootPrompt, false)
-    PromptSetVisible(deadLootPrompt, false)
-    PromptRegisterEnd(deadLootPrompt)
-end
+-- function CreateDeadLootPrompt()
+--     local str = "~e~Steal From"
+--     deadLootPrompt = PromptRegisterBegin()
+--     PromptSetControlAction(deadLootPrompt, 0xCEFD9220) -- INPUT_LOOT (default R)
+--     PromptSetText(deadLootPrompt, CreateVarString(10, "LITERAL_STRING", str))
+--     PromptSetHoldMode(deadLootPrompt, true)
+--     PromptSetEnabled(deadLootPrompt, false)
+--     PromptSetVisible(deadLootPrompt, false)
+--     PromptRegisterEnd(deadLootPrompt)
+-- end
 
 
-function GetClosestDeadPed(coords)
-    local closestPed = nil
-    local closestDistance = 3.0
-    for _, entity in pairs(GetGamePool('CPed')) do
-        if IsEntityAPed(entity) and not IsPedAPlayer(entity) and IsEntityDead(entity) then
-            local pedCoords = GetEntityCoords(entity)
-            local dist = #(coords - pedCoords)
-            if dist < closestDistance then
-                closestPed = entity
-                closestDistance = dist
-            end
-        end
-    end
-    return closestPed
-end
+-- function GetClosestDeadPed(coords)
+--     local closestPed = nil
+--     local closestDistance = 3.0
+--     for _, entity in pairs(GetGamePool('CPed')) do
+--         if IsEntityAPed(entity) and not IsPedAPlayer(entity) and IsEntityDead(entity) then
+--             local pedCoords = GetEntityCoords(entity)
+--             local dist = #(coords - pedCoords)
+--             if dist < closestDistance then
+--                 closestPed = entity
+--                 closestDistance = dist
+--             end
+--         end
+--     end
+--     return closestPed
+-- end
 
 
 CreateThread(function()
@@ -70,7 +70,7 @@ CreateThread(function()
         Wait(0)
         -- Disable native loot
         DisableControlAction(0, 0xFF8109D8, true)  -- INPUT_LOOT_ALIVE_COMPONENT
-        Citizen.InvokeNative(0xFC094EF26DD153FA, 3)
+        -- Citizen.InvokeNative(0xFC094EF26DD153FA, 3) -- Disable Looting (Also prevents from skinning animals)
 
         local playerPed = PlayerPedId()
         local playerCoords = GetEntityCoords(playerPed)
@@ -90,7 +90,6 @@ CreateThread(function()
         --     PromptSetEnabled(deadLootPrompt, false)
         --     PromptSetVisible(deadLootPrompt, false)
         -- end
-        
 
         local closestHorse, distance = GetClosestHorse(playerCoords)
         local hasSaddleBags = Citizen.InvokeNative(0xFB4891BD7578CDC1, closestHorse, 0x80451C25) -- IsHorseSaddleBagEquipped - 0x80451C25 = "HORSE_SADDLEBAGS"
@@ -102,6 +101,7 @@ CreateThread(function()
                 PromptSetVisible(saddlebagPrompt, true)
 
                 if Citizen.InvokeNative(0xE0F65F0640EF0617, saddlebagPrompt) then
+                    print("Attempting to loot")
                     PromptSetEnabled(saddlebagPrompt, false)
                     PromptSetVisible(saddlebagPrompt, false)
 
