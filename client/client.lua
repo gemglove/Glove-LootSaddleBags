@@ -92,9 +92,10 @@ CreateThread(function()
         -- end
 
         local closestHorse, distance = GetClosestHorse(playerCoords)
+        local relationship = GetPedRelationshipGroupDefaultHash(closestHorse) -- Get the relationship group of the horse
         local hasSaddleBags = Citizen.InvokeNative(0xFB4891BD7578CDC1, closestHorse, 0x80451C25) -- IsHorseSaddleBagEquipped - 0x80451C25 = "HORSE_SADDLEBAGS"
         -- Horse Bags Looting
-        if closestHorse and distance < 1.5 then
+        if closestHorse and distance < 1.5 and relationship ~= 1862763509 then -- 1862763509 = "RELATIONSHIP_GROUP_PLAYER" (This is to check if the horse belongs to the player)
             if (GetGameTimer() - lastHorseLootTime > Config.lootHorsesCooldown) and hasSaddleBags then
                 -- Show prompt only if close and not looted
                 PromptSetEnabled(saddlebagPrompt, true)
